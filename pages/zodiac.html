@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zodiac Constellation Explorer</title>
+<style>
+  body {
+    font-family: "Poppins", sans-serif;
+    background: radial-gradient(circle at top, #0a0a2a, #000);
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+  header {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    font-size: 2em;
+    letter-spacing: 2px;
+    color: #ffd700;
+    text-shadow: 0 0 8px #ffd700;
+  }
+  .container {
+    max-width: 700px;
+    margin: 40px auto;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(255,255,255,0.2);
+  }
+  input, button {
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    margin: 5px;
+    font-size: 1em;
+  }
+  input {
+    width: 50%;
+  }
+  button {
+    background: #ffd700;
+    color: #000;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  button:hover {
+    background: #ffeb7f;
+  }
+  .result {
+    margin-top: 20px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 15px;
+  }
+  .sign-name {
+    font-size: 1.5em;
+    color: #ffd700;
+    text-shadow: 0 0 10px #ffd700;
+  }
+  .fact {
+    font-style: italic;
+    color: #cfcfcf;
+  }
+</style>
+</head>
+<body>
+  <header>✨ Zodiac Constellation Explorer ✨</header>
+  <div class="container">
+    <p>Enter your birth date to discover your zodiac sign, lucky number, color, and a cool fact!</p>
+    <input type="date" id="birthdate">
+    <button onclick="showZodiac()">Find My Zodiac</button>
+
+    <div class="result" id="result"></div>
+  </div>
+
+<script>
+function showZodiac() {
+  const date = new Date(document.getElementById("birthdate").value);
+  if (!date || isNaN(date)) {
+    document.getElementById("result").innerHTML = "Please enter a valid date.";
+    return;
+  }
+
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+
+  let zodiac = "", fact = "", color = "", number = "";
+
+  if ((month == 3 && day >= 21) || (month == 4 && day <= 19)) {
+    zodiac = "Aries ♈";
+    color = "Red";
+    number = "9";
+    fact = "Aries are natural-born leaders with fiery determination.";
+  } else if ((month == 4 && day >= 20) || (month == 5 && day <= 20)) {
+    zodiac = "Taurus ♉";
+    color = "Green";
+    number = "6";
+    fact = "Taurus loves comfort, beauty, and stability — like a calm meadow.";
+  } else if ((month == 5 && day >= 21) || (month == 6 && day <= 20)) {
+    zodiac = "Gemini ♊";
+    color = "Yellow";
+    number = "5";
+    fact = "Geminis are curious and expressive — the social butterflies of the zodiac.";
+  } else if ((month == 6 && day >= 21) || (month == 7 && day <= 22)) {
+    zodiac = "Cancer ♋";
+    color = "White";
+    number = "2";
+    fact = "Cancer is nurturing and intuitive, guided by the gentle energy of the moon.";
+  } else if ((month == 7 && day >= 23) || (month == 8 && day <= 22)) {
+    zodiac = "Leo ♌";
+    color = "Gold";
+    number = "1";
+    fact = "Leo shines bright — full of confidence, creativity, and warmth.";
+  } else if ((month == 8 && day >= 23) || (month == 9 && day <= 22)) {
+    zodiac = "Virgo ♍";
+    color = "Navy Blue";
+    number = "5";
+    fact = "Virgos are perfectionists who find beauty in details and order.";
+  } else if ((month == 9 && day >= 23) || (month == 10 && day <= 22)) {
+    zodiac = "Libra ♎";
+    color = "Pink";
+    number = "6";
+    fact = "Libra values harmony, beauty, and fairness in every relationship.";
+  } else if ((month == 10 && day >= 23) || (month == 11 && day <= 21)) {
+    zodiac = "Scorpio ♏";
+    color = "Black";
+    number = "9";
+    fact = "Scorpios are passionate and mysterious — masters of transformation.";
+  } else if ((month == 11 && day >= 22) || (month == 12 && day <= 21)) {
+    zodiac = "Sagittarius ♐";
+    color = "Purple";
+    number = "3";
+    fact = "Sagittarius loves adventure, freedom, and exploring big ideas.";
+  } else if ((month == 12 && day >= 22) || (month == 1 && day <= 19)) {
+    zodiac = "Capricorn ♑";
+    color = "Brown";
+    number = "8";
+    fact = "Capricorns are ambitious dream builders who climb to the top with patience.";
+  } else if ((month == 1 && day >= 20) || (month == 2 && day <= 18)) {
+    zodiac = "Aquarius ♒";
+    color = "Blue";
+    number = "4";
+    fact = "Aquarius are visionaries — original thinkers who love to innovate.";
+  } else if ((month == 2 && day >= 19) || (month == 3 && day <= 20)) {
+    zodiac = "Pisces ♓";
+    color = "Sea Green";
+    number = "7";
+    fact = "Pisces are dreamy, kind, and deeply connected to their emotions and imagination.";
+  }
+
+  document.getElementById("result").innerHTML = `
+    <div class="sign-name">${zodiac}</div>
+    <p><strong>Lucky Number:</strong> ${number}</p>
+    <p><strong>Lucky Color:</strong> <span style="color:${color.toLowerCase()}">${color}</span></p>
+    <p class="fact">${fact}</p>
+  `;
+}
+</script>
+</body>
+</html>
