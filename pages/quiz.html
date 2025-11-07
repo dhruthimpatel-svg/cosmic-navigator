@@ -47,6 +47,7 @@
       max-width:1100px;
       margin:0 auto;
       padding:16px;
+      box-sizing: border-box;
     }
 
     header.appbar{
@@ -113,7 +114,7 @@
     .danger{ background: linear-gradient(180deg,#ff4d6d,#e63956); border-color:#ff6b85; }
 
     .content{
-      flex:1; display:grid; place-items:center; padding:16px;
+      flex:1; display:grid; place-items:center; padding:16px 0; overflow-y: auto;
     }
     .card{
       width:min(920px, 100%);
@@ -136,10 +137,8 @@
     /* Screens */
     main[hidden]{ display:none !important; }
     .screen{
-      width:100%;
-      max-width:900px;
+      width:min(920px, 100%);
       margin:0 auto;
-      padding:20px;
       background: linear-gradient(180deg,#121a44bb,#0b1133bb);
       border:1px solid #2a3570;
       border-radius:16px;
@@ -192,13 +191,13 @@
       display:flex;align-items:center;gap:10px;
     }
     .ring{
-      width:58px;height:58px; display:grid;place-items:center;
+      width:58px;height:58px; display:grid;place-items:center; position: relative;
     }
-    .ring svg{ transform:rotate(-90deg); }
+    .ring svg{ transform:rotate(-90deg); position: absolute; inset:0; }
     .ring .label{ position:absolute;font-weight:700;font-size:12px;color:var(--text) }
 
     .question{
-      font-size:22px; line-height:1.35; margin:12px 0 14px;
+      font-size:clamp(18px, 3vw, 22px); line-height:1.35; margin:12px 0 14px;
     }
 
     .options{
@@ -267,17 +266,17 @@
     }
     @keyframes pop{ 0%{ transform:scale(.4) rotate(-10deg); opacity:0 } 60%{ transform:scale(1.1) } 100%{ transform:scale(1) opacity:1 } }
     .sparkles{
-      position:relative; height:0; pointer-events:none;
+      position:absolute; inset: 0; pointer-events:none;
     }
     .sparkles i{
-      position:absolute; left:50%; top:-6px; transform:translateX(-50%);
+      position:absolute; left:50%; top:50%;
       width:6px;height:6px;border-radius:50%;
       background: radial-gradient(circle, #fff, #ffd166);
       animation: burst .8s ease forwards;
       opacity:0.9;
     }
     @keyframes burst{
-      from { transform:translate(-50%,-6px) scale(1); opacity:.95 }
+      from { transform:translate(-50%,-50%) scale(1); opacity:.95 }
       to   { transform:translate(var(--dx), var(--dy)) scale(0.4); opacity:0 }
     }
 
@@ -288,13 +287,18 @@
       background:#0f163c;border:1px solid #2a3570;border-radius:12px;
     }
     .lb-row{
-      display:grid; grid-template-columns: 56px 1fr 120px 160px 140px; gap:10px; align-items:center;
+      display:grid; grid-template-columns: 40px 1fr 100px 100px; gap:10px; align-items:center;
       padding:10px 12px; border-bottom:1px solid #22306a;
     }
     .lb-row.header{ position:sticky; top:0; background:#0f173f; font-weight:700; z-index:1; }
     .lb-row:last-child{ border-bottom:none; }
     .lb-avatar{ width:36px;height:36px; display:grid;place-items:center;border-radius:50%; background:#151e4c; border:1px solid #2d3a7a; font-size:20px; }
-    .lb-badges{ display:flex; gap:6px; flex-wrap:wrap; }
+    .lb-badges{ display:flex; gap:6px; flex-wrap:wrap; font-size:18px; }
+    @media (min-width: 768px){
+      .lb-row{ grid-template-columns: 56px 1fr 120px 160px 140px; }
+      .lb-badges{ font-size: normal; }
+    }
+
 
     .help{
       color:#9aa6d1; font-size:13px; margin-top:8px; text-align:center;
@@ -307,7 +311,7 @@
 
     /* Footer watermark */
     .footer-note{
-      text-align:center;color:#7f8ac1;font-size:12px;margin-top:10px;
+      text-align:center;color:#7f8ac1;font-size:12px;margin-top:10px; padding-bottom: 8px;
     }
   </style>
 </head>
@@ -319,7 +323,7 @@
         <div class="logo">✦</div>
         <div>
           <div style="font-size:16px;line-height:1.1">Space Quiz</div>
-          <div style="font-size:12px;color:var(--muted)">Beginner → Intermediate → Hard</div>
+          <div style="font-size:12px;color:var(--muted)">Rookie to Galaxy Master</div>
         </div>
       </div>
       <div class="app-actions">
@@ -342,7 +346,7 @@
               <div class="grow">
                 <label for="nameInput">Display name</label>
                 <input id="nameInput" type="text" placeholder="e.g., NovaPilot" maxlength="20"
-                  style="width:100%;margin-top:6px;background:#0f173e;border:1px solid #2a3570;border-radius:10px;padding:12px;color:var(--text)" />
+                  style="width:100%;margin-top:6px;background:#0f173e;border:1px solid #2a3570;border-radius:10px;padding:12px;color:var(--text); box-sizing: border-box;" />
               </div>
               <div style="min-width:160px">
                 <label>Choose your avatar</label>
@@ -387,10 +391,10 @@
                     </linearGradient>
                   </defs>
                 </svg>
-              </div>
-              <div style="text-align:center">
-                <div style="font-size:12px;color:var(--muted)">Time</div>
-                <div id="timerLabel" style="font-weight:800">--</div>
+                <div style="text-align:center">
+                  <div style="font-size:12px;color:var(--muted)">Time</div>
+                  <div id="timerLabel" style="font-weight:800">--</div>
+                </div>
               </div>
             </div>
           </div>
@@ -494,9 +498,9 @@
           <div class="lb-row header">
             <div>#</div>
             <div>Player</div>
-            <div>Total Score</div>
-            <div>Badges</div>
-            <div>Level Reached</div>
+            <div>Score</div>
+            <div class="lb-badges">Badges</div>
+            <div>Level</div>
           </div>
           <!-- rows injected -->
         </div>
@@ -544,7 +548,7 @@
           { q:"What primarily causes seasons on Earth?", options:["Distance from the Sun","Tilt of Earth's axis","Sun’s brightness change","Moon’s gravity"], a:1 },
           { q:"A satellite that remains fixed over one point on Earth is in a:", options:["Polar orbit","Elliptical orbit","Geostationary orbit","Suborbital path"], a:2 },
           { q:"What type of light does the James Webb Space Telescope primarily observe?", options:["Radio","Infrared","Ultraviolet","Gamma rays"], a:1 },
-          { q:"Which planet currently has the most known moons?", options:["Earth","Saturn","Jupiter","Neptune"], a:2 },
+          { q:"Which planet currently has the most known moons?", options:["Earth","Saturn","Jupiter","Neptune"], a:1 },
           { q:"Which mission first landed humans on the Moon?", options:["Apollo 8","Apollo 11","Apollo 12","Apollo 13"], a:1 },
         ]
       },
@@ -570,16 +574,16 @@
     ];
 
     const FUN_FACTS = [
-      "There are more stars in the universe than grains of sand on Earth.",
-      "Neutron star matter is so dense, a teaspoon would weigh billions of tons.",
+      "There are more stars in the universe than grains of sand on all the beaches on Earth.",
+      "A teaspoonful of neutron star matter would weigh about 6 billion tons.",
       "A day on Venus is longer than its year.",
-      "The footprints on the Moon could last for millions of years.",
-      "Jupiter is so big that over 1,300 Earths could fit inside it.",
-      "Saturn’s rings are mostly ice and rock—some pieces as small as dust.",
-      "If you could travel at light speed, you’d circle Earth 7.5 times in one second.",
-      "The Milky Way and Andromeda galaxies are on a collision course in 4–5 billion years.",
-      "Mars has the largest volcano in the Solar System: Olympus Mons.",
-      "Space isn’t completely empty—there are about 1 atom per cubic centimeter in interstellar space."
+      "The footprints on the Moon will likely stay there for at least 100 million years.",
+      "Jupiter is so big that all the other planets in the solar system could fit inside it.",
+      "Saturn’s rings are mostly made of ice particles, with some rock and dust.",
+      "If you could travel at the speed of light, you could go around the Earth 7.5 times in one second.",
+      "The Milky Way and Andromeda galaxies are on a collision course, set to merge in about 4.5 billion years.",
+      "Mars has the largest volcano in the Solar System, Olympus Mons, which is three times the height of Mount Everest.",
+      "Space is not completely empty—it's a near-perfect vacuum, but there are still a few atoms per cubic meter."
     ];
 
     // -----------------------------
@@ -687,7 +691,6 @@
     function showScreen(el){
       [screenHome, screenQuiz, screenResult, screenFact].forEach(s => s.hidden = true);
       el.hidden = false;
-      el.scrollIntoView({behavior:"smooth", block:"start"});
     }
 
     function updateProfileUI(){
@@ -708,42 +711,29 @@
       if(audioCtx) return;
       try {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        // Create a subtle spacey ambience using filtered noise + slow sine
         const noiseBuf = audioCtx.createBuffer(1, audioCtx.sampleRate*2, audioCtx.sampleRate);
         const data = noiseBuf.getChannelData(0);
-        for(let i=0;i<data.length;i++){
-          data[i] = (Math.random()*2-1) * 0.3;
-        }
+        for(let i=0;i<data.length;i++){ data[i] = (Math.random()*2-1) * 0.3; }
         const noise = audioCtx.createBufferSource();
         noise.buffer = noiseBuf; noise.loop = true;
-
         const filter = audioCtx.createBiquadFilter();
         filter.type = "lowpass"; filter.frequency.value = 400;
-
         const lfo = audioCtx.createOscillator();
         lfo.type="sine"; lfo.frequency.value = 0.03;
         const lfoGain = audioCtx.createGain(); lfoGain.gain.value = 250;
         lfo.connect(lfoGain).connect(filter.frequency);
-        lfo.start();
-
         const pad = audioCtx.createOscillator();
         pad.type="sine"; pad.frequency.value = 110;
         const padGain = audioCtx.createGain(); padGain.gain.value = 0.02;
         pad.connect(padGain);
-
         noise.connect(filter);
-
         const master = audioCtx.createGain();
         master.gain.value = soundEnabled ? 0.15 : 0.0;
-
         filter.connect(master);
         padGain.connect(master);
         master.connect(audioCtx.destination);
-
-        noise.start();
-        pad.start();
-
-        ambience = { master, pad, noise };
+        noise.start(); pad.start(); lfo.start();
+        ambience = { master };
       } catch(e){ console.warn("Audio init failed", e); }
     }
 
@@ -751,16 +741,13 @@
       soundEnabled = on;
       storage.set("spaceQuiz_sound", on);
       btnSound.textContent = soundEnabled ? "🔊" : "🔇";
-      if(!audioCtx){ return; }
-      if(ambience){
-        ambience.master.gain.cancelScheduledValues(audioCtx.currentTime);
-        ambience.master.gain.linearRampToValueAtTime(on ? 0.15 : 0.0, audioCtx.currentTime + 0.25);
-      }
+      if(!audioCtx || !ambience){ return; }
+      ambience.master.gain.cancelScheduledValues(audioCtx.currentTime);
+      ambience.master.gain.linearRampToValueAtTime(on ? 0.15 : 0.0, audioCtx.currentTime + 0.25);
     }
 
     function blip(ok = true){
-      if(!soundEnabled) return;
-      if(!audioCtx) return;
+      if(!soundEnabled || !audioCtx) return;
       try {
         const o = audioCtx.createOscillator();
         const g = audioCtx.createGain();
@@ -780,7 +767,7 @@
     // -----------------------------
     const canvas = document.getElementById('stars');
     const ctx = canvas.getContext('2d',{ alpha: true });
-    let W = 0, H = 0, stars = [];
+    let W = 0, H = 0, starsArr = [];
 
     function resize(){
       W = canvas.width = innerWidth * devicePixelRatio;
@@ -790,7 +777,7 @@
 
     function seedStars(){
       const count = Math.min(300, Math.floor(innerWidth/4));
-      stars = Array.from({length: count}, ()=>({
+      starsArr = Array.from({length: count}, ()=>({
         x: Math.random()*W, y: Math.random()*H,
         r: Math.random()*1.6 + 0.3,
         a: Math.random()*0.7 + 0.3,
@@ -801,7 +788,7 @@
     }
     function drawStars(){
       ctx.clearRect(0,0,W,H);
-      for(const s of stars){
+      for(const s of starsArr){
         s.o += s.tw;
         const alpha = s.a * (0.6 + Math.sin(s.o)*0.4);
         ctx.beginPath();
@@ -829,12 +816,9 @@
       lbModal.setAttribute('aria-hidden','true');
     }
     function renderLeaderboard(){
-      const rows = leaderboard.querySelectorAll('.lb-row.data');
-      rows.forEach(r=>r.remove());
-
+      leaderboard.querySelectorAll('.lb-row.data').forEach(r=>r.remove());
       const data = storage.get(LS_LB, []);
       const sorted = data.sort((a,b)=> b.totalScore - a.totalScore || (b.date||0)-(a.date||0));
-
       sorted.slice(0,50).forEach((row,i)=>{
         const el = document.createElement('div');
         el.className = 'lb-row data';
@@ -845,7 +829,7 @@
             <div class="lb-avatar">${row.avatar || "🧑‍🚀"}</div>
             <div>
               <div style="font-weight:800">${escapeHTML(row.name||"Player")}</div>
-              <div style="font-size:12px;color:var(--muted)">${new Date(row.date||Date.now()).toLocaleDateString()}</div>
+              <div style="font-size:12px;color:var(--muted); display: none; " class="lb-date">${new Date(row.date||Date.now()).toLocaleDateString()}</div>
             </div>
           </div>
           <div style="font-weight:800">${row.totalScore}</div>
@@ -861,8 +845,7 @@
     // -----------------------------
     function showBadge(badge){
       badgeEmoji.textContent = badge.emoji;
-      badgeName.textContent = badge.emoji + " " + badge.name;
-      // Sparkles burst
+      badgeName.textContent = `${badge.emoji} ${badge.name}`;
       sparkles.innerHTML = "";
       for(let i=0;i<34;i++){
         const s = document.createElement('i');
@@ -889,14 +872,8 @@
       levelPill.textContent = `Level ${level.id} — ${level.name}`;
       scoreText.textContent = state.totalScore;
 
-      // Build order
       if(resume && progress && progress.inLevel && progress.levelIndex === levelIndex){
-        // Restore
-        session.order = progress.order;
-        session.qIndex = progress.qIndex;
-        session.correctCount = progress.correctCount;
-        session.score = progress.levelScore || 0;
-        session.answered = progress.answered || [];
+        session = { ...session, ...progress, score: progress.levelScore };
       } else {
         session.order = shuffle([...Array(level.questions.length).keys()]);
         session.qIndex = 0;
@@ -905,17 +882,11 @@
         session.answered = [];
       }
 
-      // Timer
-      if(level.timePerQ){
-        timerWrap.style.display = 'flex';
-      } else {
-        timerWrap.style.display = 'none';
-      }
-
+      timerWrap.style.display = level.timePerQ ? 'flex' : 'none';
       saveProgress(true);
       showScreen(screenQuiz);
       renderQuestion();
-      initAudio(); // ensure ambience ready after user interaction
+      initAudio();
     }
 
     function renderQuestion(){
@@ -933,36 +904,29 @@
       quizCard.classList.remove('correct','incorrect');
       btnNext.disabled = true;
 
-      // Render options
       q.options.forEach((opt, i)=>{
         const btn = document.createElement('button');
         btn.className = 'option';
         btn.innerHTML = `<span>${escapeHTML(opt)}</span>`;
-        btn.addEventListener('click', ()=> choose(i));
+        btn.onclick = ()=> choose(i);
         optionsWrap.appendChild(btn);
       });
 
-      // Timer
-      if(level.timePerQ){
-        startTimer(level.timePerQ);
-      }
+      if(level.timePerQ) startTimer(level.timePerQ);
     }
 
     function choose(choiceIndex){
       const level = LEVELS[session.levelIndex];
       stopTimer();
-      const q = level.questions[ session.order[session.qIndex] ];
+      const q = level.questions[session.order[session.qIndex]];
       const correct = choiceIndex === q.a;
 
-      // Mark options
-      const all = [...document.querySelectorAll('.option')];
-      all.forEach((b,i)=>{
+      optionsWrap.querySelectorAll('.option').forEach((b,i)=>{
         b.classList.add('disabled');
         if(i === q.a) b.classList.add('correct');
         if(i === choiceIndex && !correct) b.classList.add('incorrect');
       });
 
-      // Score & feedback
       if(correct){
         session.correctCount++;
         session.score += level.points;
@@ -980,23 +944,15 @@
 
       scoreText.textContent = state.totalScore;
       btnNext.disabled = false;
-
-      // Record answer
       session.answered.push({ correct, choice: choiceIndex, correctIndex: q.a });
-
-      // Save
       saveProgress(true);
     }
 
     function skipQuestion(){
-      const level = LEVELS[session.levelIndex];
-      const idx = session.order[session.qIndex];
-      const q = level.questions[idx];
       stopTimer();
-
-      // Mark correct, but as info only
-      const all = [...document.querySelectorAll('.option')];
-      all.forEach((b,i)=>{
+      const level = LEVELS[session.levelIndex];
+      const q = level.questions[session.order[session.qIndex]];
+      optionsWrap.querySelectorAll('.option').forEach((b,i)=>{
         b.classList.add('disabled');
         if(i === q.a) b.classList.add('correct');
       });
@@ -1004,16 +960,13 @@
       feedback.classList.add('bad');
       quizCard.classList.add('incorrect');
       btnNext.disabled = false;
-
       session.answered.push({ correct:false, choice:null, correctIndex:q.a });
       saveProgress(true);
     }
 
     function nextQuestion(){
-      const level = LEVELS[session.levelIndex];
-      const total = level.questions.length;
       session.qIndex++;
-      if(session.qIndex >= total){
+      if(session.qIndex >= LEVELS[session.levelIndex].questions.length){
         finishLevel();
       } else {
         renderQuestion();
@@ -1022,34 +975,25 @@
 
     function finishLevel(){
       stopTimer();
-      // Update unlocked level & state
       const level = LEVELS[session.levelIndex];
-      const totalQ = level.questions.length;
-      const correct = session.correctCount;
-      const acc = Math.round((correct/totalQ)*100);
+      const acc = Math.round((session.correctCount/level.questions.length)*100);
 
-      // Update highest level
       state.highestLevel = Math.max(state.highestLevel, level.id);
-      state.unlockedLevel = Math.max(state.unlockedLevel, level.id + 1);
+      if(level.id < 3) state.unlockedLevel = Math.max(state.unlockedLevel, level.id + 1);
       storage.set(LS_STATE, state);
-
-      // Clear in-progress (level finished)
       saveProgress(false);
 
-      // Results UI
       showScreen(screenResult);
       resultLevelChip.textContent = `Level ${level.id} — ${level.name}`;
       resultScore.textContent = session.score;
       resultAcc.textContent = acc + "%";
       resultTotal.textContent = state.totalScore;
 
-      // Badge awarding
       const res = { completed: true, accuracy: acc };
       let showBadgeNow = false;
       badgeEarnedWrap.style.display = 'none';
 
-      // Check target badge for this level
-      const b = LEVELS[session.levelIndex].badge;
+      const b = level.badge;
       if(b && b.rule(res) && !state.badges.find(x=>x.name===b.name)){
         state.badges.push(b);
         storage.set(LS_STATE, state);
@@ -1058,16 +1002,14 @@
         showBadgeNow = true;
       }
 
-      // Progress to next level button visibility
-      btnNextLevel.style.display = (level.id < 3) ? 'inline-block' : 'none';
-
-      // Show badge modal with confetti
+      btnNextLevel.style.display = (level.id < 3 && state.unlockedLevel > level.id) ? 'inline-block' : 'none';
       if(showBadgeNow) setTimeout(()=>showBadge(b), 450);
     }
 
     function saveProgress(inLevel){
       if(!inLevel){
         storage.del(LS_PROGRESS);
+        progress = null;
         return;
       }
       const data = {
@@ -1081,6 +1023,7 @@
         stateSnapshot: state
       };
       storage.set(LS_PROGRESS, data);
+      progress = data;
     }
 
     // -----------------------------
@@ -1100,17 +1043,14 @@
       function tick(now){
         if(!session.timerActive) return;
         const t = clamp((end - now)/1000, 0, seconds);
-        session.timeLeft = t;
         const p = t/seconds;
         timerCircle.style.strokeDashoffset = String((1-p)*CIRC);
         timerLabel.textContent = Math.ceil(t)+"s";
-
         if(t <= 0){
-          session.timerActive = false;
           timeUp();
-          return;
+        } else {
+          session.timer = requestAnimationFrame(tick);
         }
-        session.timer = requestAnimationFrame(tick);
       }
       session.timer = requestAnimationFrame(tick);
     }
@@ -1122,12 +1062,10 @@
     }
 
     function timeUp(){
+      stopTimer();
       const level = LEVELS[session.levelIndex];
-      const idx = session.order[session.qIndex];
-      const q = level.questions[idx];
-
-      const all = [...document.querySelectorAll('.option')];
-      all.forEach((b,i)=>{
+      const q = level.questions[session.order[session.qIndex]];
+      optionsWrap.querySelectorAll('.option').forEach((b,i)=>{
         b.classList.add('disabled');
         if(i === q.a) b.classList.add('correct');
       });
@@ -1135,39 +1073,28 @@
       feedback.classList.add('bad');
       quizCard.classList.add('incorrect');
       blip(false);
-
       session.answered.push({ correct:false, choice:null, correctIndex:q.a });
       saveProgress(true);
-
-      // Auto-advance after a moment
-      setTimeout(()=> nextQuestion(), 1200);
+      setTimeout(()=> nextQuestion(), 1500);
     }
 
     // -----------------------------
-    // Share
+    // Share & Helpers
     // -----------------------------
     async function shareScore(){
       const lvl = LEVELS[session.levelIndex];
-      const text = `I just finished Level ${lvl.id} — ${lvl.name} on Space Quiz!\n`+
-                   `Level score: ${session.score}\n`+
-                   `Total credits: ${state.totalScore}\n`+
+      const text = `I just finished Level ${lvl.id} (${lvl.name}) on Space Quiz!\n`+
+                   `My score: ${session.score}\nTotal credits: ${state.totalScore}\n`+
                    `Badges: ${(state.badges||[]).map(b=>b.emoji).join(' ') || '—'}`;
       if(navigator.share){
-        try{ await navigator.share({ title:"Space Quiz — My Score", text, url: location.href }); }
-        catch{}
+        try{ await navigator.share({ title:"Space Quiz Score", text, url: location.href }); } catch{}
       } else {
         try {
           await navigator.clipboard.writeText(text);
           alert("Score copied to clipboard! Share it with your friends 🚀");
-        } catch {
-          alert(text);
-        }
+        } catch { alert(text); }
       }
     }
-
-    // -----------------------------
-    // Helpers
-    // -----------------------------
     function escapeHTML(str=""){
       return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
     }
@@ -1175,161 +1102,102 @@
     // -----------------------------
     // Events
     // -----------------------------
-    btnStart.addEventListener('click', ()=>{
+    btnStart.onclick = ()=>{
       const name = (nameInput.value || "").trim();
-      if(!name){
-        alert("Please enter a display name.");
-        return;
-      }
+      if(!name){ alert("Please enter a display name."); return; }
       profile.name = name;
       storage.set(LS_PROFILE, profile);
       updateProfileUI();
       state.unlockedLevel = Math.max(state.unlockedLevel, 1);
       storage.set(LS_STATE, state);
       startLevel(0, false);
-    });
+    };
 
-    btnContinue.addEventListener('click', ()=>{
+    btnContinue.onclick = ()=>{
       if(progress && progress.inLevel){
-        // restore saved profile/state snapshot if present
-        if(progress.stateSnapshot){
-          state = progress.stateSnapshot;
-          storage.set(LS_STATE, state);
-        }
+        if(progress.stateSnapshot) { state = progress.stateSnapshot; storage.set(LS_STATE, state); }
         startLevel(progress.levelIndex, true);
       } else if(state.unlockedLevel > 1){
-        // Continue to next unlocked level
         startLevel(state.unlockedLevel-1, false);
-      } else {
-        startLevel(0,false);
-      }
-    });
+      } else { startLevel(0,false); }
+    };
 
-    btnReset.addEventListener('click', ()=>{
-      if(confirm("This will clear your profile, progress, and leaderboard data. Continue?")){
-        storage.del(LS_PROFILE);
-        storage.del(LS_PROGRESS);
-        storage.del(LS_STATE);
-        storage.del(LS_LB);
+    btnReset.onclick = ()=>{
+      if(confirm("This will clear ALL your data (profile, progress, leaderboard). Are you sure?")){
+        [LS_PROFILE, LS_PROGRESS, LS_STATE, LS_LB].forEach(k => storage.del(k));
         location.reload();
       }
+    };
+
+    avatarOptions.forEach(opt => opt.onclick = ()=>{
+      avatarOptions.forEach(o=>o.classList.remove('active'));
+      opt.classList.add('active');
+      profile.avatar = opt.dataset.avatar;
+      storage.set(LS_PROFILE, profile);
+      updateProfileUI();
     });
 
-    // Avatar selection
-    avatarOptions.forEach(opt=>{
-      opt.addEventListener('click', ()=>{
-        avatarOptions.forEach(o=>o.classList.remove('active'));
-        opt.classList.add('active');
-        profile.avatar = opt.dataset.avatar;
-        storage.set(LS_PROFILE, profile);
-        updateProfileUI();
-      });
-    });
-
-    btnNext.addEventListener('click', nextQuestion);
-    btnSkip.addEventListener('click', skipQuestion);
-
-    btnRetry.addEventListener('click', ()=>{
-      startLevel(session.levelIndex, false);
-    });
-
-    btnNextLevel.addEventListener('click', ()=>{
+    btnNext.onclick = nextQuestion;
+    btnSkip.onclick = skipQuestion;
+    btnRetry.onclick = ()=> startLevel(session.levelIndex, false);
+    btnNextLevel.onclick = ()=>{
       const next = session.levelIndex + 1;
       if(next < LEVELS.length){
-        // Between-level fact
-        const fact = FUN_FACTS[Math.floor(Math.random()*FUN_FACTS.length)];
-        factText.textContent = "🛰️ " + fact;
+        factText.textContent = "🛰️ " + FUN_FACTS[Math.floor(Math.random()*FUN_FACTS.length)];
         showScreen(screenFact);
         btnFactContinue.onclick = ()=> startLevel(next, false);
-      } else {
-        alert("You've completed all levels. Try to improve your score or share it! 🌌");
-      }
-    });
+      } else { alert("You've completed all levels! 🌌"); }
+    };
+    btnShare.onclick = shareScore;
 
-    btnShare.addEventListener('click', shareScore);
-
-    btnSaveLB.addEventListener('click', ()=>{
+    btnSaveLB.onclick = ()=>{
       const lb = storage.get(LS_LB, []);
-      // Update existing or push new
-      const now = Date.now();
-      const entry = {
-        name: profile.name || "Player",
-        avatar: profile.avatar || "🧑‍🚀",
-        totalScore: state.totalScore,
-        badges: state.badges || [],
-        levelReached: state.highestLevel || 0,
-        date: now
-      };
-      lb.push(entry);
+      const entry = { name: profile.name, avatar: profile.avatar, totalScore: state.totalScore, badges: state.badges, levelReached: state.highestLevel, date: Date.now() };
+      const existingIndex = lb.findIndex(e=> e.name === profile.name);
+      if(existingIndex > -1){
+        // Update if new score is higher
+        if(lb[existingIndex].totalScore < entry.totalScore) lb[existingIndex] = entry;
+      } else {
+        lb.push(entry);
+      }
       storage.set(LS_LB, lb);
       openLB();
-    });
+    };
 
-    btnLeaderboard.addEventListener('click', openLB);
-    closeLB.addEventListener('click', closeLBModal);
-    lbModal.addEventListener('click', (e)=>{ if(e.target === lbModal) closeLBModal(); });
+    btnLeaderboard.onclick = openLB;
+    closeLB.onclick = closeLBModal;
+    lbModal.onclick = (e)=>{ if(e.target === lbModal) closeLBModal(); };
+    closeBadgeModal.onclick = closeBadge;
+    badgeModal.onclick = (e)=>{ if(e.target === badgeModal) closeBadge(); };
+    btnSound.onclick = ()=> setSoundEnabled(!soundEnabled);
 
-    closeBadgeModal.addEventListener('click', closeBadge);
-    badgeModal.addEventListener('click', (e)=>{ if(e.target === badgeModal) closeBadge(); });
+    nameInput.oninput = ()=>{
+      profile.name = nameInput.value.trim();
+      storage.set(LS_PROFILE, profile);
+      updateProfileUI();
+    };
 
-    btnSound.addEventListener('click', ()=>{
-      initAudio();
-      setSoundEnabled(!soundEnabled);
+    // Keyboard support
+    document.addEventListener('keydown', (e)=>{
+      if(!screenQuiz.hidden){
+        const idx = ['1','2','3','4'].indexOf(e.key);
+        if(idx >= 0) optionsWrap.querySelectorAll('.option')[idx]?.click();
+        else if(e.key === 'Enter') btnNext.click();
+      }
     });
 
     // -----------------------------
     // Init Home Screen
     // -----------------------------
     function init(){
-      // If profile exists, set UI
-      if(profile.name){
-        nameInput.value = profile.name;
-      }
-      if(!profile.avatar){
-        profile.avatar = "🧑‍🚀";
-        storage.set(LS_PROFILE, profile);
-      }
+      if(profile.name) nameInput.value = profile.name;
+      if(!profile.avatar) profile.avatar = "🧑‍🚀";
       updateProfileUI();
-
-      // Continue button logic
       const hasProgress = !!(progress && progress.inLevel);
       btnContinue.style.display = hasProgress || state.unlockedLevel > 1 ? 'inline-block' : 'none';
-      chipName.textContent = profile.name || "Guest";
     }
     init();
 
-    // -----------------------------
-    // Accessibility: keyboard for options
-    // -----------------------------
-    document.addEventListener('keydown', (e)=>{
-      if(screenQuiz.hidden) return;
-      const digits = ['1','2','3','4'];
-      const idx = digits.indexOf(e.key);
-      if(idx >=0){
-        const buttons = [...document.querySelectorAll('.option')];
-        if(buttons[idx] && !buttons[idx].classList.contains('disabled')){
-          buttons[idx].click();
-        }
-      } else if(e.key === 'Enter' && !btnNext.disabled){
-        btnNext.click();
-      } else if(e.key === 'Escape'){
-        // quick leaderboard
-        openLB();
-      }
-    });
-
-    // -----------------------------
-    // Small: profile live save
-    // -----------------------------
-    nameInput.addEventListener('input', ()=>{
-      profile.name = nameInput.value.trim();
-      storage.set(LS_PROFILE, profile);
-      updateProfileUI();
-    });
-
-    // -----------------------------
-    // Done
-    // -----------------------------
   </script>
 </body>
 </html>
