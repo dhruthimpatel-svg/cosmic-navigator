@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Space Quiz — Rookie to Galaxy Master</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#070b1a;
+      --bg-2:#0b1026;
+      --card:#101735;
+      --accent:#6fe3ff;
+      --accent-2:#a79cff;
+      --good:#18c674;
+      --bad:#ff4d6d;
+      --text:#e8edff;
+      --muted:#9aa6d1;
+      --gold:#ffd166;
+      --progress:#6fe3ff;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+      --radius:16px;
+    }
+
+    html,body{
+      margin:0;
+      height:100%;
+      color:var(--text);
+      background: radial-gradient(1200px 800px at 20% -10%, #18244f11, transparent),
+                  radial-gradient(1200px 800px at 120% 10%, #341d6e12, transparent),
+                  var(--bg);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      overflow:hidden;
+    }
+
+    /* Star canvas backdrop */
+    #stars{
+      position:fixed;
+      inset:0;
+      z-index:-1;
+    }
+
+    .app{
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      height:100dvh;
+      max-width:1100px;
+      margin:0 auto;
+      padding:16px;
+    }
+
+    header.appbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px 16px;
+      border-radius:var(--radius);
+      background:linear-gradient(180deg, #14204a66, #0a123066);
+      backdrop-filter: blur(8px);
+      box-shadow: var(--shadow);
+    }
+    .brand{
+      display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.3px;
+    }
+    .brand .logo{
+      width:36px;height:36px;border-radius:50%;
+      display:grid;place-items:center;
+      background: radial-gradient(circle at 30% 30%, #6fe3ff, #a79cff);
+      box-shadow: 0 0 20px #6fe3ff33;
+      color:#07111e;
+      font-size:20px;
+    }
+    .app-actions{
+      display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    }
+    .chip{
+      background:#17224b;
+      color:var(--text);
+      border:1px solid #2a3570;
+      padding:8px 12px;border-radius:999px;
+      font-size:14px;display:flex;align-items:center;gap:8px;
+    }
+    .ghost{
+      background:transparent;border:1px solid #2a3570;
+    }
+    button, .btn{
+      background: linear-gradient(180deg,#25336d,#1a2454);
+      color:var(--text);
+      border:1px solid #30408a;
+      border-radius:12px;
+      padding:12px 16px;
+      font-weight:600;
+      cursor:pointer;
+      transition: transform .1s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+      box-shadow: 0 6px 16px rgba(0,0,0,.25);
+    }
+    button:hover, .btn:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 10px 20px rgba(0,0,0,.35), 0 0 0 2px #6fe3ff22 inset;
+      border-color:#3d55c0;
+    }
+    button:disabled{opacity:.6;cursor:not-allowed;transform:none}
+    .icon-btn{
+      background:#121a3e;border:1px solid #2a3570;padding:10px;border-radius:10px;
+      width:42px;height:42px;display:grid;place-items:center;
+    }
+    .primary{
+      background: linear-gradient(180deg,#3d77ff,#3457ff);
+      border-color:#3457ff;
+    }
+    .success{ background: linear-gradient(180deg,#0fb576,#0c9a64); border-color:#14c987; }
+    .danger{ background: linear-gradient(180deg,#ff4d6d,#e63956); border-color:#ff6b85; }
+
+    .content{
+      flex:1; display:grid; place-items:center; padding:16px;
+    }
+    .card{
+      width:min(920px, 100%);
+      background: linear-gradient(180deg, #0e1635aa, #0a1230aa);
+      border:1px solid #273170;
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card-header{
+      display:flex;align-items:center;justify-content:space-between;gap:8px;
+      padding:14px 18px;border-bottom:1px solid #273170;
+      background: linear-gradient(180deg, #121b3f, transparent);
+    }
+    .card-body{ padding:18px; }
+    .row{ display:flex; gap:12px; flex-wrap:wrap; }
+    .grow{ flex:1; }
+    .center{ text-align:center; }
+
+    /* Screens */
+    main[hidden]{ display:none !important; }
+    .screen{
+      width:100%;
+      max-width:900px;
+      margin:0 auto;
+      padding:20px;
+      background: linear-gradient(180deg,#121a44bb,#0b1133bb);
+      border:1px solid #2a3570;
+      border-radius:16px;
+      box-shadow: var(--shadow);
+      animation: fadeIn .35s ease;
+    }
+    @keyframes fadeIn{ from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none} }
+
+    /* Profile picker */
+    .profile-setup{
+      display:grid;gap:16px;
+    }
+    .avatar-grid{
+      display:grid;grid-template-columns:repeat(auto-fit, minmax(64px,1fr)); gap:10px;
+    }
+    .avatar-option{
+      display:grid;place-items:center;padding:10px;border-radius:12px;border:1px solid #2a3570;background:#121a3e;cursor:pointer;
+      transition: transform .08s ease, border-color .15s ease, box-shadow .2s ease;
+      font-size:28px;
+      aspect-ratio:1/1;
+      user-select:none;
+    }
+    .avatar-option:hover{ transform: translateY(-2px); border-color:#3e56c0; box-shadow:0 8px 20px rgba(0,0,0,.3), 0 0 0 2px #6fe3ff22 inset}
+    .avatar-option.active{ border-color:#6fe3ff; box-shadow: 0 0 0 3px #6fe3ff33 inset, 0 10px 22px rgba(0,0,0,.35); }
+
+    /* Quiz elements */
+    .quiz-top{
+      display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;margin-bottom:10px;
+    }
+    .level-pill{
+      display:flex;align-items:center;gap:8px;
+      padding:8px 12px;border-radius:999px;
+      background:#101a46;border:1px solid #2a3570;color:var(--text);
+      font-weight:600;
+    }
+    .score-pill{
+      display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:#0f1a42;border:1px solid #273170;
+    }
+
+    .progress{
+      height:10px;border-radius:999px;background:#0c1538;border:1px solid #24306c;overflow:hidden;
+    }
+    .progress > span{
+      display:block;height:100%;background:linear-gradient(90deg, var(--progress), #a79cff);
+      width:0%;
+      transition: width .3s ease;
+    }
+
+    .timer{
+      display:flex;align-items:center;gap:10px;
+    }
+    .ring{
+      width:58px;height:58px; display:grid;place-items:center;
+    }
+    .ring svg{ transform:rotate(-90deg); }
+    .ring .label{ position:absolute;font-weight:700;font-size:12px;color:var(--text) }
+
+    .question{
+      font-size:22px; line-height:1.35; margin:12px 0 14px;
+    }
+
+    .options{
+      display:grid;gap:10px;margin:12px 0 6px;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width:700px){ .options{ grid-template-columns: 1fr 1fr; } }
+    .option{
+      text-align:left; border-radius:12px; padding:14px 14px;
+      background:#121a3e; border:1px solid #2a3570; cursor:pointer;
+      transition: background .15s ease, transform .07s ease, border-color .2s ease, box-shadow .2s ease;
+      position:relative; overflow:hidden;
+    }
+    .option:hover{ transform: translateY(-1px); border-color:#3e56c0; box-shadow:0 10px 18px rgba(0,0,0,.35), 0 0 0 2px #6fe3ff22 inset; }
+    .option.correct{ background: #0d3223; border-color: #1ccf84; box-shadow: 0 0 0 2px #1ccf8433 inset; }
+    .option.incorrect{ background: #3a0e1b; border-color: #ff6e85; box-shadow: 0 0 0 2px #ff6e8533 inset; }
+    .option.disabled{ opacity:.8; pointer-events:none; }
+
+    .feedback{
+      min-height:28px; margin:8px 0 10px;font-weight:600;
+      color:var(--muted);
+    }
+    .feedback.good{ color: var(--good); }
+    .feedback.bad{ color: var(--bad); }
+
+    .quiz-container.correct{
+      animation: goodflash .3s ease;
+      box-shadow: 0 0 0 3px #17d18433 inset;
+    }
+    .quiz-container.incorrect{
+      animation: badflash .3s ease;
+      box-shadow: 0 0 0 3px #ff708b33 inset;
+    }
+    @keyframes goodflash{ from{ background-color:#0c3a2a55 } to{ background-color:transparent } }
+    @keyframes badflash{ from{ background-color:#4a0f2355 } to{ background-color:transparent } }
+
+    /* Results */
+    .stats{
+      display:grid;grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:12px;margin:14px 0 8px;
+    }
+    .stat{
+      background:#101a46;border:1px solid #2a3570;border-radius:12px;padding:12px; text-align:center;
+    }
+    .badge{
+      display:inline-flex;align-items:center;gap:10px;background:#151c41;border:1px solid #334189;border-radius:12px;padding:12px 14px;
+      font-weight:700;
+    }
+
+    /* Badge unlocked modal */
+    .modal{
+      position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+      background: radial-gradient(600px 300px at 50% 30%, #0a143644, transparent) , #01040d70;
+      backdrop-filter: blur(2px);
+      z-index:50;
+    }
+    .modal.show{ display:flex; animation: fadeIn .2s ease; }
+    .modal-card{
+      background: linear-gradient(180deg,#131d46,#0c1436);
+      border:1px solid #3d4da0;
+      border-radius:16px; padding:18px; width:min(520px, 92vw); text-align:center;
+      box-shadow: 0 20px 60px rgba(0,0,0,.45);
+    }
+    .badge-emoji{
+      font-size:64px; filter: drop-shadow(0 14px 30px rgba(255, 255, 255, .15));
+      animation: pop .55s cubic-bezier(.2,1.4,.3,1);
+    }
+    @keyframes pop{ 0%{ transform:scale(.4) rotate(-10deg); opacity:0 } 60%{ transform:scale(1.1) } 100%{ transform:scale(1) opacity:1 } }
+    .sparkles{
+      position:relative; height:0; pointer-events:none;
+    }
+    .sparkles i{
+      position:absolute; left:50%; top:-6px; transform:translateX(-50%);
+      width:6px;height:6px;border-radius:50%;
+      background: radial-gradient(circle, #fff, #ffd166);
+      animation: burst .8s ease forwards;
+      opacity:0.9;
+    }
+    @keyframes burst{
+      from { transform:translate(-50%,-6px) scale(1); opacity:.95 }
+      to   { transform:translate(var(--dx), var(--dy)) scale(0.4); opacity:0 }
+    }
+
+    /* Leaderboard */
+    .leaderboard{
+      max-height:min(60vh, 520px);
+      overflow:auto;
+      background:#0f163c;border:1px solid #2a3570;border-radius:12px;
+    }
+    .lb-row{
+      display:grid; grid-template-columns: 56px 1fr 120px 160px 140px; gap:10px; align-items:center;
+      padding:10px 12px; border-bottom:1px solid #22306a;
+    }
+    .lb-row.header{ position:sticky; top:0; background:#0f173f; font-weight:700; z-index:1; }
+    .lb-row:last-child{ border-bottom:none; }
+    .lb-avatar{ width:36px;height:36px; display:grid;place-items:center;border-radius:50%; background:#151e4c; border:1px solid #2d3a7a; font-size:20px; }
+    .lb-badges{ display:flex; gap:6px; flex-wrap:wrap; }
+
+    .help{
+      color:#9aa6d1; font-size:13px; margin-top:8px; text-align:center;
+    }
+
+    /* Fact screen */
+    .fact{
+      font-size:20px; line-height:1.5; text-align:center; color:#dfe7ff; margin:12px 0;
+    }
+
+    /* Footer watermark */
+    .footer-note{
+      text-align:center;color:#7f8ac1;font-size:12px;margin-top:10px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="stars"></canvas>
+  <div class="app">
+    <header class="appbar">
+      <div class="brand">
+        <div class="logo">✦</div>
+        <div>
+          <div style="font-size:16px;line-height:1.1">Space Quiz</div>
+          <div style="font-size:12px;color:var(--muted)">Beginner → Intermediate → Hard</div>
+        </div>
+      </div>
+      <div class="app-actions">
+        <button class="icon-btn" id="btnSound" title="Toggle ambience">🔊</button>
+        <button class="icon-btn" id="btnLeaderboard" title="Leaderboard">🏆</button>
+        <div class="chip" id="profileChip" title="Your profile">👤 <span id="chipName">Guest</span></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- Home / Profile -->
+      <main id="screen-home" class="screen" aria-live="polite">
+        <div class="card-header">
+          <div style="font-weight:800;font-size:18px">Welcome, Space Cadet!</div>
+          <div class="chip ghost">Create a profile to start</div>
+        </div>
+        <div class="card-body">
+          <div class="profile-setup">
+            <div class="row">
+              <div class="grow">
+                <label for="nameInput">Display name</label>
+                <input id="nameInput" type="text" placeholder="e.g., NovaPilot" maxlength="20"
+                  style="width:100%;margin-top:6px;background:#0f173e;border:1px solid #2a3570;border-radius:10px;padding:12px;color:var(--text)" />
+              </div>
+              <div style="min-width:160px">
+                <label>Choose your avatar</label>
+                <div class="avatar-grid" style="margin-top:6px">
+                  <div class="avatar-option" data-avatar="🧑‍🚀">🧑‍🚀</div>
+                  <div class="avatar-option" data-avatar="👩‍🚀">👩‍🚀</div>
+                  <div class="avatar-option" data-avatar="🪐">🪐</div>
+                  <div class="avatar-option" data-avatar="🚀">🚀</div>
+                  <div class="avatar-option" data-avatar="🌌">🌌</div>
+                  <div class="avatar-option" data-avatar="🌙">🌙</div>
+                  <div class="avatar-option" data-avatar="🛰️">🛰️</div>
+                  <div class="avatar-option" data-avatar="☄️">☄️</div>
+                </div>
+              </div>
+            </div>
+            <div class="row" style="align-items:center; justify-content:space-between;">
+              <div class="help">Tip: You can view the leaderboard anytime. Progress is saved locally.</div>
+              <div class="row">
+                <button id="btnReset" class="ghost">Reset data</button>
+                <button id="btnContinue" class="btn" style="display:none">Continue</button>
+                <button id="btnStart" class="primary">Start Level 1</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Quiz -->
+      <main id="screen-quiz" class="screen" hidden>
+        <div class="quiz-top">
+          <div class="level-pill" id="levelPill">Level 1 — Beginner</div>
+          <div class="row">
+            <div class="score-pill"><span>Score:</span> <strong id="scoreText">0</strong></div>
+            <div class="timer" id="timerWrap" style="display:none">
+              <div class="ring">
+                <svg viewBox="0 0 120 120" class="ring-svg">
+                  <circle cx="60" cy="60" r="52" stroke="#1f2b61" stroke-width="12" fill="none"></circle>
+                  <circle id="timerCircle" cx="60" cy="60" r="52" stroke="url(#grad)" stroke-linecap="round" stroke-width="12" fill="none" stroke-dasharray="327" stroke-dashoffset="0"></circle>
+                  <defs>
+                    <linearGradient id="grad" x1="0" x2="1">
+                      <stop offset="0%" stop-color="#6fe3ff"/><stop offset="100%" stop-color="#a79cff"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+              <div style="text-align:center">
+                <div style="font-size:12px;color:var(--muted)">Time</div>
+                <div id="timerLabel" style="font-weight:800">--</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="progress" aria-label="Progress">
+          <span id="progressBar"></span>
+        </div>
+
+        <div class="card quiz-container" id="quizCard" style="margin-top:14px;">
+          <div class="card-body">
+            <div class="question" id="questionText">Question goes here</div>
+            <div class="options" id="options"></div>
+            <div class="feedback" id="feedback"></div>
+            <div class="row" style="justify-content:space-between;align-items:center">
+              <div class="help" id="helpText">Answer to continue.</div>
+              <div class="row">
+                <button id="btnSkip" class="ghost">Skip</button>
+                <button id="btnNext" class="primary" disabled>Next</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Between levels fun fact -->
+      <main id="screen-fact" class="screen" hidden>
+        <div class="card-header">
+          <div style="font-weight:800">Intermission</div>
+          <div class="chip">Space Fact</div>
+        </div>
+        <div class="card-body center">
+          <div class="fact" id="factText">Did you know...?</div>
+          <div class="row center" style="justify-content:center;margin-top:10px">
+            <button id="btnFactContinue" class="primary">Continue</button>
+          </div>
+        </div>
+      </main>
+
+      <!-- Results -->
+      <main id="screen-result" class="screen" hidden>
+        <div class="card-header">
+          <div style="font-weight:800">Level Complete</div>
+          <div class="chip" id="resultLevelChip">Level</div>
+        </div>
+        <div class="card-body center">
+          <h2 id="resultTitle">Great job!</h2>
+          <div class="stats">
+            <div class="stat">
+              <div style="color:#a7b4ff">Level Score</div>
+              <div style="font-size:26px;font-weight:900" id="resultScore">0</div>
+            </div>
+            <div class="stat">
+              <div style="color:#a7b4ff">Accuracy</div>
+              <div style="font-size:26px;font-weight:900" id="resultAcc">0%</div>
+            </div>
+            <div class="stat">
+              <div style="color:#a7b4ff">Total Credits</div>
+              <div style="font-size:26px;font-weight:900" id="resultTotal">0</div>
+            </div>
+          </div>
+
+          <div id="badgeEarnedWrap" style="margin:12px 0;display:none">
+            <div class="badge" id="badgeEarned">🏅 Badge</div>
+          </div>
+
+          <div class="row" style="justify-content:center;gap:10px;margin-top:10px">
+            <button id="btnRetry" class="ghost">Retry Level</button>
+            <button id="btnNextLevel" class="primary">Next Level</button>
+            <button id="btnShare" class="btn">Share your score</button>
+            <button id="btnSaveLB" class="success">Submit to Leaderboard</button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div class="footer-note">Leaderboard and progress are stored locally in your browser.</div>
+
+    <!-- Badge Modal -->
+    <div class="modal" id="badgeModal" aria-hidden="true">
+      <div class="modal-card">
+        <div class="sparkles" id="sparkles"></div>
+        <div class="badge-emoji" id="badgeEmoji">🏅</div>
+        <h3 style="margin:8px 0 6px">Badge Unlocked!</h3>
+        <div id="badgeName" style="font-weight:800;margin-bottom:8px">Rookie Astronomer</div>
+        <div class="help">Keep going to collect them all.</div>
+        <div class="row center" style="justify-content:center;margin-top:12px">
+          <button class="primary" id="closeBadgeModal">Awesome!</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Leaderboard Modal -->
+    <div class="modal" id="lbModal" aria-hidden="true">
+      <div class="modal-card" style="width:min(860px,95vw);text-align:left">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px">
+          <div style="font-weight:800;font-size:18px">Global Leaderboard</div>
+          <button class="icon-btn" id="closeLB">✖️</button>
+        </div>
+        <div class="leaderboard" id="leaderboard">
+          <div class="lb-row header">
+            <div>#</div>
+            <div>Player</div>
+            <div>Total Score</div>
+            <div>Badges</div>
+            <div>Level Reached</div>
+          </div>
+          <!-- rows injected -->
+        </div>
+        <div class="help">Note: This leaderboard is stored locally on your device.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // -----------------------------
+    // Data: Questions per level
+    // -----------------------------
+    const LEVELS = [
+      {
+        id: 1,
+        name: "Beginner",
+        points: 10,
+        timePerQ: null, // no timer
+        badge: { emoji:"🪐", name:"Rookie Astronomer", rule: (res)=>res.completed },
+        questions: [
+          { q:"How many planets are in our Solar System?", options:["7","8","9","10"], a:1 },
+          { q:"Which planet is closest to the Sun?", options:["Mercury","Venus","Earth","Mars"], a:0 },
+          { q:"What is Earth's natural satellite called?", options:["Phobos","Europa","The Moon","Titan"], a:2 },
+          { q:"Which planet is known as the Red Planet?", options:["Jupiter","Mars","Saturn","Neptune"], a:1 },
+          { q:"What is the largest planet in our Solar System?", options:["Saturn","Jupiter","Neptune","Uranus"], a:1 },
+          { q:"What is the star at the center of our Solar System?", options:["Polaris","Sirius","The Sun","Betelgeuse"], a:2 },
+          { q:"Which Moon phase shows the fully lit near side?", options:["New Moon","First Quarter","Full Moon","Crescent"], a:2 },
+          { q:"Who was the first human in space?", options:["Neil Armstrong","Valentina Tereshkova","Yuri Gagarin","Buzz Aldrin"], a:2 },
+          { q:"What is the name of our galaxy?", options:["Andromeda","Milky Way","Triangulum","Sombrero"], a:1 },
+          { q:"What do astronauts wear to survive in space?", options:["Lab coat","Space suit","Diving suit","Armor"], a:1 },
+        ]
+      },
+      {
+        id: 2,
+        name: "Intermediate",
+        points: 20,
+        timePerQ: 30,
+        badge: { emoji:"🚀", name:"Space Explorer", rule: (res)=>res.completed },
+        questions: [
+          { q:"The path of a planet around the Sun is called an:", options:["Axis","Rotation","Orbit","Tilt"], a:2 },
+          { q:"The shape of Earth's orbit around the Sun is roughly a(n):", options:["Circle","Ellipse","Square","Parabola"], a:1 },
+          { q:"Which constellation is known as the Hunter?", options:["Orion","Ursa Major","Cassiopeia","Lyra"], a:0 },
+          { q:"The Hubble Space Telescope orbits around:", options:["The Moon","Mars","Earth","The Sun"], a:2 },
+          { q:"The International Space Station completes an orbit roughly every:", options:["45 minutes","90 minutes","6 hours","24 hours"], a:1 },
+          { q:"What primarily causes seasons on Earth?", options:["Distance from the Sun","Tilt of Earth's axis","Sun’s brightness change","Moon’s gravity"], a:1 },
+          { q:"A satellite that remains fixed over one point on Earth is in a:", options:["Polar orbit","Elliptical orbit","Geostationary orbit","Suborbital path"], a:2 },
+          { q:"What type of light does the James Webb Space Telescope primarily observe?", options:["Radio","Infrared","Ultraviolet","Gamma rays"], a:1 },
+          { q:"Which planet currently has the most known moons?", options:["Earth","Saturn","Jupiter","Neptune"], a:2 },
+          { q:"Which mission first landed humans on the Moon?", options:["Apollo 8","Apollo 11","Apollo 12","Apollo 13"], a:1 },
+        ]
+      },
+      {
+        id: 3,
+        name: "Hard",
+        points: 30,
+        timePerQ: 20,
+        badge: { emoji:"🌌", name:"Galaxy Master", rule: (res)=> res.completed && res.accuracy >= 80 },
+        questions: [
+          { q:"The boundary of a black hole beyond which nothing can escape is the:", options:["Accretion disk","Event horizon","Singularity","Photon ring"], a:1 },
+          { q:"Kepler’s primary method for finding exoplanets by dimming starlight is the:", options:["Radial velocity method","Transit method","Direct imaging","Microlensing"], a:1 },
+          { q:"The cosmic microwave background (CMB) temperature is about:", options:["0 K","2.7 K","20 K","273 K"], a:1 },
+          { q:"The Hertzsprung–Russell diagram plots stars by:", options:["Luminosity vs temperature","Mass vs radius","Distance vs brightness","Age vs metallicity"], a:0 },
+          { q:"Kepler’s third law (for the Sun) is commonly expressed as:", options:["P ∝ a","P² ∝ a³","P³ ∝ a²","P ∝ a²"], a:1 },
+          { q:"A neutron star is best described as:", options:["A cooled white dwarf","A newborn star","A dense core of mostly neutrons","A failed star"], a:2 },
+          { q:"A key evidence for dark matter in galaxies is:", options:["Solar flares","Flat rotation curves","Planetary transits","Comet tails"], a:1 },
+          { q:"When a Sun-like star sheds its outer layers, the remnant is a:", options:["Black hole","Neutron star","Brown dwarf","White dwarf"], a:3 },
+          { q:"Gravitational lensing occurs when:", options:["Light slows in space","Magnetic fields bend light","Mass curves spacetime and bends light","Planets align perfectly"], a:2 },
+          { q:"Type Ia supernovae are useful as standard candles because they:", options:["Occur in the same galaxy","Have nearly uniform peak luminosities","Are very common","Are always nearby"], a:1 },
+        ]
+      }
+    ];
+
+    const FUN_FACTS = [
+      "There are more stars in the universe than grains of sand on Earth.",
+      "Neutron star matter is so dense, a teaspoon would weigh billions of tons.",
+      "A day on Venus is longer than its year.",
+      "The footprints on the Moon could last for millions of years.",
+      "Jupiter is so big that over 1,300 Earths could fit inside it.",
+      "Saturn’s rings are mostly ice and rock—some pieces as small as dust.",
+      "If you could travel at light speed, you’d circle Earth 7.5 times in one second.",
+      "The Milky Way and Andromeda galaxies are on a collision course in 4–5 billion years.",
+      "Mars has the largest volcano in the Solar System: Olympus Mons.",
+      "Space isn’t completely empty—there are about 1 atom per cubic centimeter in interstellar space."
+    ];
+
+    // -----------------------------
+    // State & Persistence
+    // -----------------------------
+    const storage = {
+      get: (k, d=null)=>{ try{ return JSON.parse(localStorage.getItem(k)) ?? d } catch{ return d } },
+      set: (k, v)=> localStorage.setItem(k, JSON.stringify(v)),
+      del: (k)=> localStorage.removeItem(k)
+    };
+
+    const LS_PROFILE = "spaceQuiz_profile";
+    const LS_STATE   = "spaceQuiz_state";
+    const LS_PROGRESS= "spaceQuiz_progress";
+    const LS_LB      = "spaceQuiz_leaderboard";
+
+    let profile = storage.get(LS_PROFILE, { name:"", avatar:"🧑‍🚀" });
+    let state   = storage.get(LS_STATE,   { unlockedLevel:1, totalScore:0, badges:[], highestLevel:0 });
+    let progress= storage.get(LS_PROGRESS, null);
+
+    // Session data (in-memory during a level)
+    let session = {
+      levelIndex: 0, // 0-based
+      order: [],
+      qIndex: 0,
+      correctCount: 0,
+      score: 0,
+      answered: [], // {correct, choice, correctIndex}
+      timer: null,
+      timeLeft: 0,
+      timerActive: false,
+    };
+
+    // -----------------------------
+    // DOM refs
+    // -----------------------------
+    const screenHome = document.getElementById('screen-home');
+    const screenQuiz = document.getElementById('screen-quiz');
+    const screenResult = document.getElementById('screen-result');
+    const screenFact = document.getElementById('screen-fact');
+
+    const btnStart = document.getElementById('btnStart');
+    const btnContinue = document.getElementById('btnContinue');
+    const btnReset = document.getElementById('btnReset');
+    const nameInput = document.getElementById('nameInput');
+    const avatarOptions = [...document.querySelectorAll('.avatar-option')];
+    const chipName = document.getElementById('chipName');
+    const profileChip = document.getElementById('profileChip');
+
+    const levelPill = document.getElementById('levelPill');
+    const scoreText = document.getElementById('scoreText');
+    const progressBar = document.getElementById('progressBar');
+    const timerWrap = document.getElementById('timerWrap');
+    const timerCircle = document.getElementById('timerCircle');
+    const timerLabel = document.getElementById('timerLabel');
+    const quizCard = document.getElementById('quizCard');
+    const questionText = document.getElementById('questionText');
+    const optionsWrap = document.getElementById('options');
+    const feedback = document.getElementById('feedback');
+    const btnNext = document.getElementById('btnNext');
+    const btnSkip = document.getElementById('btnSkip');
+    const helpText = document.getElementById('helpText');
+
+    const resultLevelChip = document.getElementById('resultLevelChip');
+    const resultTitle = document.getElementById('resultTitle');
+    const resultScore = document.getElementById('resultScore');
+    const resultAcc = document.getElementById('resultAcc');
+    const resultTotal = document.getElementById('resultTotal');
+    const badgeEarnedWrap = document.getElementById('badgeEarnedWrap');
+    const badgeEarned = document.getElementById('badgeEarned');
+    const btnRetry = document.getElementById('btnRetry');
+    const btnNextLevel = document.getElementById('btnNextLevel');
+    const btnShare = document.getElementById('btnShare');
+    const btnSaveLB = document.getElementById('btnSaveLB');
+
+    const btnLeaderboard = document.getElementById('btnLeaderboard');
+    const lbModal = document.getElementById('lbModal');
+    const leaderboard = document.getElementById('leaderboard');
+    const closeLB = document.getElementById('closeLB');
+
+    const badgeModal = document.getElementById('badgeModal');
+    const badgeEmoji = document.getElementById('badgeEmoji');
+    const badgeName = document.getElementById('badgeName');
+    const closeBadgeModal = document.getElementById('closeBadgeModal');
+    const sparkles = document.getElementById('sparkles');
+
+    const btnSound = document.getElementById('btnSound');
+    const btnFactContinue = document.getElementById('btnFactContinue');
+    const factText = document.getElementById('factText');
+
+    // -----------------------------
+    // Utilities
+    // -----------------------------
+    const shuffle = arr => {
+      const a = arr.slice();
+      for(let i=a.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i],a[j]]=[a[j],a[i]];
+      }
+      return a;
+    };
+
+    const clamp = (v, min, max)=> Math.max(min, Math.min(max, v));
+
+    function showScreen(el){
+      [screenHome, screenQuiz, screenResult, screenFact].forEach(s => s.hidden = true);
+      el.hidden = false;
+      el.scrollIntoView({behavior:"smooth", block:"start"});
+    }
+
+    function updateProfileUI(){
+      chipName.textContent = profile.name || "Guest";
+      document.querySelectorAll('.avatar-option').forEach(el=>{
+        el.classList.toggle('active', el.dataset.avatar === profile.avatar);
+      });
+      profileChip.firstChild.textContent = profile.avatar + " ";
+    }
+
+    // -----------------------------
+    // Ambience (WebAudio)
+    // -----------------------------
+    let audioCtx = null, ambience = null, soundEnabled = storage.get("spaceQuiz_sound", true);
+    btnSound.textContent = soundEnabled ? "🔊" : "🔇";
+
+    function initAudio(){
+      if(audioCtx) return;
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        // Create a subtle spacey ambience using filtered noise + slow sine
+        const noiseBuf = audioCtx.createBuffer(1, audioCtx.sampleRate*2, audioCtx.sampleRate);
+        const data = noiseBuf.getChannelData(0);
+        for(let i=0;i<data.length;i++){
+          data[i] = (Math.random()*2-1) * 0.3;
+        }
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = noiseBuf; noise.loop = true;
+
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = "lowpass"; filter.frequency.value = 400;
+
+        const lfo = audioCtx.createOscillator();
+        lfo.type="sine"; lfo.frequency.value = 0.03;
+        const lfoGain = audioCtx.createGain(); lfoGain.gain.value = 250;
+        lfo.connect(lfoGain).connect(filter.frequency);
+        lfo.start();
+
+        const pad = audioCtx.createOscillator();
+        pad.type="sine"; pad.frequency.value = 110;
+        const padGain = audioCtx.createGain(); padGain.gain.value = 0.02;
+        pad.connect(padGain);
+
+        noise.connect(filter);
+
+        const master = audioCtx.createGain();
+        master.gain.value = soundEnabled ? 0.15 : 0.0;
+
+        filter.connect(master);
+        padGain.connect(master);
+        master.connect(audioCtx.destination);
+
+        noise.start();
+        pad.start();
+
+        ambience = { master, pad, noise };
+      } catch(e){ console.warn("Audio init failed", e); }
+    }
+
+    function setSoundEnabled(on){
+      soundEnabled = on;
+      storage.set("spaceQuiz_sound", on);
+      btnSound.textContent = soundEnabled ? "🔊" : "🔇";
+      if(!audioCtx){ return; }
+      if(ambience){
+        ambience.master.gain.cancelScheduledValues(audioCtx.currentTime);
+        ambience.master.gain.linearRampToValueAtTime(on ? 0.15 : 0.0, audioCtx.currentTime + 0.25);
+      }
+    }
+
+    function blip(ok = true){
+      if(!soundEnabled) return;
+      if(!audioCtx) return;
+      try {
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = ok ? "triangle" : "square";
+        o.frequency.value = ok ? 660 : 220;
+        g.gain.value = 0.0001;
+        o.connect(g).connect(audioCtx.destination);
+        o.start();
+        g.gain.exponentialRampToValueAtTime(0.12, audioCtx.currentTime + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.15);
+        o.stop(audioCtx.currentTime + 0.17);
+      } catch {}
+    }
+
+    // -----------------------------
+    // Stars background (Canvas)
+    // -----------------------------
+    const canvas = document.getElementById('stars');
+    const ctx = canvas.getContext('2d',{ alpha: true });
+    let W = 0, H = 0, stars = [];
+
+    function resize(){
+      W = canvas.width = innerWidth * devicePixelRatio;
+      H = canvas.height= innerHeight * devicePixelRatio;
+    }
+    addEventListener('resize', ()=>{ resize(); seedStars(); });
+
+    function seedStars(){
+      const count = Math.min(300, Math.floor(innerWidth/4));
+      stars = Array.from({length: count}, ()=>({
+        x: Math.random()*W, y: Math.random()*H,
+        r: Math.random()*1.6 + 0.3,
+        a: Math.random()*0.7 + 0.3,
+        tw: Math.random()*0.02 + 0.005,
+        o: Math.random()*Math.PI*2,
+        vx: (Math.random()*0.2 + 0.05) * (Math.random()<0.5? -1:1)
+      }));
+    }
+    function drawStars(){
+      ctx.clearRect(0,0,W,H);
+      for(const s of stars){
+        s.o += s.tw;
+        const alpha = s.a * (0.6 + Math.sin(s.o)*0.4);
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+        ctx.fill();
+        s.x += s.vx;
+        if(s.x < -10) s.x = W+10;
+        if(s.x > W+10) s.x = -10;
+      }
+      requestAnimationFrame(drawStars);
+    }
+    resize(); seedStars(); drawStars();
+
+    // -----------------------------
+    // Leaderboard
+    // -----------------------------
+    function openLB(){
+      renderLeaderboard();
+      lbModal.classList.add('show');
+      lbModal.setAttribute('aria-hidden','false');
+    }
+    function closeLBModal(){
+      lbModal.classList.remove('show');
+      lbModal.setAttribute('aria-hidden','true');
+    }
+    function renderLeaderboard(){
+      const rows = leaderboard.querySelectorAll('.lb-row.data');
+      rows.forEach(r=>r.remove());
+
+      const data = storage.get(LS_LB, []);
+      const sorted = data.sort((a,b)=> b.totalScore - a.totalScore || (b.date||0)-(a.date||0));
+
+      sorted.slice(0,50).forEach((row,i)=>{
+        const el = document.createElement('div');
+        el.className = 'lb-row data';
+        const badges = (row.badges||[]).map(b=> b.emoji).join(' ');
+        el.innerHTML = `
+          <div>${i+1}</div>
+          <div style="display:flex; align-items:center; gap:10px">
+            <div class="lb-avatar">${row.avatar || "🧑‍🚀"}</div>
+            <div>
+              <div style="font-weight:800">${escapeHTML(row.name||"Player")}</div>
+              <div style="font-size:12px;color:var(--muted)">${new Date(row.date||Date.now()).toLocaleDateString()}</div>
+            </div>
+          </div>
+          <div style="font-weight:800">${row.totalScore}</div>
+          <div class="lb-badges">${badges || "—"}</div>
+          <div>${row.levelReached || 0}</div>
+        `;
+        leaderboard.appendChild(el);
+      });
+    }
+
+    // -----------------------------
+    // Badge Modal
+    // -----------------------------
+    function showBadge(badge){
+      badgeEmoji.textContent = badge.emoji;
+      badgeName.textContent = badge.emoji + " " + badge.name;
+      // Sparkles burst
+      sparkles.innerHTML = "";
+      for(let i=0;i<34;i++){
+        const s = document.createElement('i');
+        const dx = (Math.random()*260 - 130) + "px";
+        const dy = (Math.random()*-160 - 40) + "px";
+        s.style.setProperty('--dx', dx);
+        s.style.setProperty('--dy', dy);
+        sparkles.appendChild(s);
+      }
+      badgeModal.classList.add('show');
+      badgeModal.setAttribute('aria-hidden','false');
+    }
+    function closeBadge(){
+      badgeModal.classList.remove('show');
+      badgeModal.setAttribute('aria-hidden','true');
+    }
+
+    // -----------------------------
+    // Quiz Flow
+    // -----------------------------
+    function startLevel(levelIndex, resume=false){
+      session.levelIndex = levelIndex;
+      const level = LEVELS[levelIndex];
+      levelPill.textContent = `Level ${level.id} — ${level.name}`;
+      scoreText.textContent = state.totalScore;
+
+      // Build order
+      if(resume && progress && progress.inLevel && progress.levelIndex === levelIndex){
+        // Restore
+        session.order = progress.order;
+        session.qIndex = progress.qIndex;
+        session.correctCount = progress.correctCount;
+        session.score = progress.levelScore || 0;
+        session.answered = progress.answered || [];
+      } else {
+        session.order = shuffle([...Array(level.questions.length).keys()]);
+        session.qIndex = 0;
+        session.correctCount = 0;
+        session.score = 0;
+        session.answered = [];
+      }
+
+      // Timer
+      if(level.timePerQ){
+        timerWrap.style.display = 'flex';
+      } else {
+        timerWrap.style.display = 'none';
+      }
+
+      saveProgress(true);
+      showScreen(screenQuiz);
+      renderQuestion();
+      initAudio(); // ensure ambience ready after user interaction
+    }
+
+    function renderQuestion(){
+      const level = LEVELS[session.levelIndex];
+      const total = level.questions.length;
+      const idx = session.order[session.qIndex];
+      const q = level.questions[idx];
+
+      progressBar.style.width = `${(session.qIndex / total) * 100}%`;
+      questionText.textContent = `Q${session.qIndex+1}. ${q.q}`;
+      optionsWrap.innerHTML = '';
+      feedback.textContent = '';
+      feedback.className = 'feedback';
+      helpText.textContent = level.timePerQ ? "Answer before time runs out!" : "Answer to continue.";
+      quizCard.classList.remove('correct','incorrect');
+      btnNext.disabled = true;
+
+      // Render options
+      q.options.forEach((opt, i)=>{
+        const btn = document.createElement('button');
+        btn.className = 'option';
+        btn.innerHTML = `<span>${escapeHTML(opt)}</span>`;
+        btn.addEventListener('click', ()=> choose(i));
+        optionsWrap.appendChild(btn);
+      });
+
+      // Timer
+      if(level.timePerQ){
+        startTimer(level.timePerQ);
+      }
+    }
+
+    function choose(choiceIndex){
+      const level = LEVELS[session.levelIndex];
+      stopTimer();
+      const q = level.questions[ session.order[session.qIndex] ];
+      const correct = choiceIndex === q.a;
+
+      // Mark options
+      const all = [...document.querySelectorAll('.option')];
+      all.forEach((b,i)=>{
+        b.classList.add('disabled');
+        if(i === q.a) b.classList.add('correct');
+        if(i === choiceIndex && !correct) b.classList.add('incorrect');
+      });
+
+      // Score & feedback
+      if(correct){
+        session.correctCount++;
+        session.score += level.points;
+        state.totalScore += level.points;
+        feedback.textContent = `Correct! +${level.points} credits`;
+        feedback.classList.add('good');
+        quizCard.classList.add('correct');
+        blip(true);
+      } else {
+        feedback.textContent = `Incorrect. Correct answer: ${q.options[q.a]}`;
+        feedback.classList.add('bad');
+        quizCard.classList.add('incorrect');
+        blip(false);
+      }
+
+      scoreText.textContent = state.totalScore;
+      btnNext.disabled = false;
+
+      // Record answer
+      session.answered.push({ correct, choice: choiceIndex, correctIndex: q.a });
+
+      // Save
+      saveProgress(true);
+    }
+
+    function skipQuestion(){
+      const level = LEVELS[session.levelIndex];
+      const idx = session.order[session.qIndex];
+      const q = level.questions[idx];
+      stopTimer();
+
+      // Mark correct, but as info only
+      const all = [...document.querySelectorAll('.option')];
+      all.forEach((b,i)=>{
+        b.classList.add('disabled');
+        if(i === q.a) b.classList.add('correct');
+      });
+      feedback.textContent = `Skipped. Correct answer: ${q.options[q.a]}`;
+      feedback.classList.add('bad');
+      quizCard.classList.add('incorrect');
+      btnNext.disabled = false;
+
+      session.answered.push({ correct:false, choice:null, correctIndex:q.a });
+      saveProgress(true);
+    }
+
+    function nextQuestion(){
+      const level = LEVELS[session.levelIndex];
+      const total = level.questions.length;
+      session.qIndex++;
+      if(session.qIndex >= total){
+        finishLevel();
+      } else {
+        renderQuestion();
+      }
+    }
+
+    function finishLevel(){
+      stopTimer();
+      // Update unlocked level & state
+      const level = LEVELS[session.levelIndex];
+      const totalQ = level.questions.length;
+      const correct = session.correctCount;
+      const acc = Math.round((correct/totalQ)*100);
+
+      // Update highest level
+      state.highestLevel = Math.max(state.highestLevel, level.id);
+      state.unlockedLevel = Math.max(state.unlockedLevel, level.id + 1);
+      storage.set(LS_STATE, state);
+
+      // Clear in-progress (level finished)
+      saveProgress(false);
+
+      // Results UI
+      showScreen(screenResult);
+      resultLevelChip.textContent = `Level ${level.id} — ${level.name}`;
+      resultScore.textContent = session.score;
+      resultAcc.textContent = acc + "%";
+      resultTotal.textContent = state.totalScore;
+
+      // Badge awarding
+      const res = { completed: true, accuracy: acc };
+      let showBadgeNow = false;
+      badgeEarnedWrap.style.display = 'none';
+
+      // Check target badge for this level
+      const b = LEVELS[session.levelIndex].badge;
+      if(b && b.rule(res) && !state.badges.find(x=>x.name===b.name)){
+        state.badges.push(b);
+        storage.set(LS_STATE, state);
+        badgeEarned.textContent = `${b.emoji} ${b.name}`;
+        badgeEarnedWrap.style.display = 'inline-block';
+        showBadgeNow = true;
+      }
+
+      // Progress to next level button visibility
+      btnNextLevel.style.display = (level.id < 3) ? 'inline-block' : 'none';
+
+      // Show badge modal with confetti
+      if(showBadgeNow) setTimeout(()=>showBadge(b), 450);
+    }
+
+    function saveProgress(inLevel){
+      if(!inLevel){
+        storage.del(LS_PROGRESS);
+        return;
+      }
+      const data = {
+        inLevel: true,
+        levelIndex: session.levelIndex,
+        order: session.order,
+        qIndex: session.qIndex,
+        correctCount: session.correctCount,
+        answered: session.answered,
+        levelScore: session.score,
+        stateSnapshot: state
+      };
+      storage.set(LS_PROGRESS, data);
+    }
+
+    // -----------------------------
+    // Timer
+    // -----------------------------
+    const CIRC = 2*Math.PI*52; // r=52 in svg
+    function startTimer(seconds){
+      stopTimer();
+      session.timeLeft = seconds;
+      timerCircle.style.strokeDasharray = CIRC;
+      timerCircle.style.strokeDashoffset = 0;
+      timerLabel.textContent = seconds+"s";
+      session.timerActive = true;
+      const start = performance.now();
+      const end = start + seconds*1000;
+
+      function tick(now){
+        if(!session.timerActive) return;
+        const t = clamp((end - now)/1000, 0, seconds);
+        session.timeLeft = t;
+        const p = t/seconds;
+        timerCircle.style.strokeDashoffset = String((1-p)*CIRC);
+        timerLabel.textContent = Math.ceil(t)+"s";
+
+        if(t <= 0){
+          session.timerActive = false;
+          timeUp();
+          return;
+        }
+        session.timer = requestAnimationFrame(tick);
+      }
+      session.timer = requestAnimationFrame(tick);
+    }
+
+    function stopTimer(){
+      session.timerActive = false;
+      if(session.timer) cancelAnimationFrame(session.timer);
+      session.timer = null;
+    }
+
+    function timeUp(){
+      const level = LEVELS[session.levelIndex];
+      const idx = session.order[session.qIndex];
+      const q = level.questions[idx];
+
+      const all = [...document.querySelectorAll('.option')];
+      all.forEach((b,i)=>{
+        b.classList.add('disabled');
+        if(i === q.a) b.classList.add('correct');
+      });
+      feedback.textContent = `Time's up! Correct answer: ${q.options[q.a]}`;
+      feedback.classList.add('bad');
+      quizCard.classList.add('incorrect');
+      blip(false);
+
+      session.answered.push({ correct:false, choice:null, correctIndex:q.a });
+      saveProgress(true);
+
+      // Auto-advance after a moment
+      setTimeout(()=> nextQuestion(), 1200);
+    }
+
+    // -----------------------------
+    // Share
+    // -----------------------------
+    async function shareScore(){
+      const lvl = LEVELS[session.levelIndex];
+      const text = `I just finished Level ${lvl.id} — ${lvl.name} on Space Quiz!\n`+
+                   `Level score: ${session.score}\n`+
+                   `Total credits: ${state.totalScore}\n`+
+                   `Badges: ${(state.badges||[]).map(b=>b.emoji).join(' ') || '—'}`;
+      if(navigator.share){
+        try{ await navigator.share({ title:"Space Quiz — My Score", text, url: location.href }); }
+        catch{}
+      } else {
+        try {
+          await navigator.clipboard.writeText(text);
+          alert("Score copied to clipboard! Share it with your friends 🚀");
+        } catch {
+          alert(text);
+        }
+      }
+    }
+
+    // -----------------------------
+    // Helpers
+    // -----------------------------
+    function escapeHTML(str=""){
+      return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    // -----------------------------
+    // Events
+    // -----------------------------
+    btnStart.addEventListener('click', ()=>{
+      const name = (nameInput.value || "").trim();
+      if(!name){
+        alert("Please enter a display name.");
+        return;
+      }
+      profile.name = name;
+      storage.set(LS_PROFILE, profile);
+      updateProfileUI();
+      state.unlockedLevel = Math.max(state.unlockedLevel, 1);
+      storage.set(LS_STATE, state);
+      startLevel(0, false);
+    });
+
+    btnContinue.addEventListener('click', ()=>{
+      if(progress && progress.inLevel){
+        // restore saved profile/state snapshot if present
+        if(progress.stateSnapshot){
+          state = progress.stateSnapshot;
+          storage.set(LS_STATE, state);
+        }
+        startLevel(progress.levelIndex, true);
+      } else if(state.unlockedLevel > 1){
+        // Continue to next unlocked level
+        startLevel(state.unlockedLevel-1, false);
+      } else {
+        startLevel(0,false);
+      }
+    });
+
+    btnReset.addEventListener('click', ()=>{
+      if(confirm("This will clear your profile, progress, and leaderboard data. Continue?")){
+        storage.del(LS_PROFILE);
+        storage.del(LS_PROGRESS);
+        storage.del(LS_STATE);
+        storage.del(LS_LB);
+        location.reload();
+      }
+    });
+
+    // Avatar selection
+    avatarOptions.forEach(opt=>{
+      opt.addEventListener('click', ()=>{
+        avatarOptions.forEach(o=>o.classList.remove('active'));
+        opt.classList.add('active');
+        profile.avatar = opt.dataset.avatar;
+        storage.set(LS_PROFILE, profile);
+        updateProfileUI();
+      });
+    });
+
+    btnNext.addEventListener('click', nextQuestion);
+    btnSkip.addEventListener('click', skipQuestion);
+
+    btnRetry.addEventListener('click', ()=>{
+      startLevel(session.levelIndex, false);
+    });
+
+    btnNextLevel.addEventListener('click', ()=>{
+      const next = session.levelIndex + 1;
+      if(next < LEVELS.length){
+        // Between-level fact
+        const fact = FUN_FACTS[Math.floor(Math.random()*FUN_FACTS.length)];
+        factText.textContent = "🛰️ " + fact;
+        showScreen(screenFact);
+        btnFactContinue.onclick = ()=> startLevel(next, false);
+      } else {
+        alert("You've completed all levels. Try to improve your score or share it! 🌌");
+      }
+    });
+
+    btnShare.addEventListener('click', shareScore);
+
+    btnSaveLB.addEventListener('click', ()=>{
+      const lb = storage.get(LS_LB, []);
+      // Update existing or push new
+      const now = Date.now();
+      const entry = {
+        name: profile.name || "Player",
+        avatar: profile.avatar || "🧑‍🚀",
+        totalScore: state.totalScore,
+        badges: state.badges || [],
+        levelReached: state.highestLevel || 0,
+        date: now
+      };
+      lb.push(entry);
+      storage.set(LS_LB, lb);
+      openLB();
+    });
+
+    btnLeaderboard.addEventListener('click', openLB);
+    closeLB.addEventListener('click', closeLBModal);
+    lbModal.addEventListener('click', (e)=>{ if(e.target === lbModal) closeLBModal(); });
+
+    closeBadgeModal.addEventListener('click', closeBadge);
+    badgeModal.addEventListener('click', (e)=>{ if(e.target === badgeModal) closeBadge(); });
+
+    btnSound.addEventListener('click', ()=>{
+      initAudio();
+      setSoundEnabled(!soundEnabled);
+    });
+
+    // -----------------------------
+    // Init Home Screen
+    // -----------------------------
+    function init(){
+      // If profile exists, set UI
+      if(profile.name){
+        nameInput.value = profile.name;
+      }
+      if(!profile.avatar){
+        profile.avatar = "🧑‍🚀";
+        storage.set(LS_PROFILE, profile);
+      }
+      updateProfileUI();
+
+      // Continue button logic
+      const hasProgress = !!(progress && progress.inLevel);
+      btnContinue.style.display = hasProgress || state.unlockedLevel > 1 ? 'inline-block' : 'none';
+      chipName.textContent = profile.name || "Guest";
+    }
+    init();
+
+    // -----------------------------
+    // Accessibility: keyboard for options
+    // -----------------------------
+    document.addEventListener('keydown', (e)=>{
+      if(screenQuiz.hidden) return;
+      const digits = ['1','2','3','4'];
+      const idx = digits.indexOf(e.key);
+      if(idx >=0){
+        const buttons = [...document.querySelectorAll('.option')];
+        if(buttons[idx] && !buttons[idx].classList.contains('disabled')){
+          buttons[idx].click();
+        }
+      } else if(e.key === 'Enter' && !btnNext.disabled){
+        btnNext.click();
+      } else if(e.key === 'Escape'){
+        // quick leaderboard
+        openLB();
+      }
+    });
+
+    // -----------------------------
+    // Small: profile live save
+    // -----------------------------
+    nameInput.addEventListener('input', ()=>{
+      profile.name = nameInput.value.trim();
+      storage.set(LS_PROFILE, profile);
+      updateProfileUI();
+    });
+
+    // -----------------------------
+    // Done
+    // -----------------------------
+  </script>
+</body>
+</html>
